@@ -1,25 +1,11 @@
 from typing import Any
 
-from attr import dataclass
-from datasets import Dataset
-from peft import LoraConfig
 import wandb
 import torch
 import multiprocessing as mp
-from src.dispatch import TaskDispatcher
+from .dispatch import TaskDispatcher
+from .trainingConfig import MultituneConfig,TaskConfig
 wandb.login()
-
-@dataclass
-class TaskConfig:
-    name: str
-    dataset: Dataset
-    trainer_config: Any
-
-@dataclass
-class MultituneConfig:
-    model_id: str
-    lora_config: LoraConfig
-    tasks: list[TaskConfig]
 
 class Multitune:
     def __init__(self,config:MultituneConfig):
