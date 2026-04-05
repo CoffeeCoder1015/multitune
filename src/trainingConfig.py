@@ -12,6 +12,7 @@ class TaskConfig:
     trainer_config: Any
     trainer_kwargs: dict = None
     reward_func: Any = None
+    entity: str = "messing_around"
 
 @dataclass
 class MultituneConfig:
