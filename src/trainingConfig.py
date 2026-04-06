@@ -1,6 +1,6 @@
-from typing import Any
+from typing import Any, Callable
 
-from attr import dataclass
+from attr import dataclass, field
 from datasets import Dataset
 from peft import LoraConfig
 
@@ -8,9 +8,10 @@ from peft import LoraConfig
 class TaskConfig:
     name: str
     dataset: Dataset
-    trainer_class: Any
+    data_formatter: Callable
     trainer_config: Any
-    trainer_kwargs: dict = None
+    trainer_class: Any
+    trainer_kwargs: dict = field(factory=dict)
     reward_func: Any = None
     entity: str = "messing_around"
 
