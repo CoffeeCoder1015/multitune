@@ -1,16 +1,15 @@
-from typing import Any
+import os
 
-import wandb
 import torch
 import multiprocessing as mp
 from .dispatch import TaskDispatcher
 from .trainingConfig import MultituneConfig,TaskConfig
-wandb.login()
 
 class Multitune:
     def __init__(self,config:MultituneConfig):
         self.config = config
         self.GPU_PER_MODEL = 1
+        self.wandb_api_key = os.environ["WANDB_API_KEY"]
     
     def finetune(self):
         available_gpus = torch.cuda.device_count()//self.GPU_PER_MODEL
@@ -19,7 +18,7 @@ class Multitune:
         processes = []
         for i,task in enumerate( self.config.tasks ):
             assigned_gpus = [i*self.GPU_PER_MODEL + j for j in range(self.GPU_PER_MODEL)]
-            p = mp.Process(target=TaskDispatcher,args=(self.config.model_id,self.config.lora_config,task,assigned_gpus))
+            p = mp.Process(target=TaskDispatcher,args=(self.wandb_api_key,self.config.model_id,self.config.lora_config,task,assigned_gpus))
             processes.append(p)
             p.start()
         try:
