@@ -2,3 +2,4 @@
 *.lock
 launch.bat
 __pycache__
+deploy
