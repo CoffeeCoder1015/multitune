@@ -18,5 +18,5 @@ class TaskConfig:
 @dataclass
 class MultituneConfig:
     model_id: str
-    lora_config: LoraConfig
+    lora_config: LoraConfig|dict
     tasks: list[TaskConfig]
