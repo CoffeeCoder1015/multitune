@@ -1,3 +1,5 @@
+import os
+
 from .trainingConfig import TaskConfig
 from peft import LoraConfig, get_peft_model
 import torch
@@ -18,6 +20,7 @@ def TaskDispatcher(report_key:str,model_id:str,lora_config:LoraConfig,task:TaskC
     # TODO: May drop assigned_gpus?
     if not assigned_gpus:
         raise ValueError("TaskDispatcher requires at least one assigned GPU")
+    print("Assigned GPUs:",os.environ["CUDA_VISIBLE_DEVICES"],assigned_gpus)
 
     data = task.dataset
     data = data.map(task.data_formatter, remove_columns=data.column_names)
