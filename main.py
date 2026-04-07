@@ -41,13 +41,15 @@ def chat_sql_formatter(example):
 
 # Training configuration
 config = MultituneConfig(
-    model_id="Qwen/Qwen3-4B",
-    lora_config=LoraConfig(
-        lora_alpha=16,                      
-        r=64,
-        bias="none", 
-        task_type="CAUSAL_LM",
-        target_modules=[
+    model_id="unsloth/Qwen3-4B-bnb-4bit",
+    lora_config={
+        "lora_alpha": 16,
+        "r": 64,
+        "lora_dropout": 0,
+        "bias": "none",
+        "use_gradient_checkpointing": "unsloth",
+        "random_state": 3407,
+        "target_modules": [
             "q_proj",
             "k_proj",
             "v_proj",
@@ -55,8 +57,8 @@ config = MultituneConfig(
             "gate_proj",
             "up_proj",
             "down_proj",
-        ],  
-    ),
+        ],
+    },
     tasks=[
         TaskConfig(
             name="medical_reasoning",
