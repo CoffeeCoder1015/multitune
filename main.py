@@ -23,7 +23,7 @@ def medical_formatter(example):
 
 # Training configuration
 config = MultituneConfig(
-    model_id="Qwen/Qwen3.5-4B-Base",
+    model_id="LiquidAI/LFM2.5-1.2B-Base",
     lora_config=LoraConfig(
         lora_alpha=16,                      
         r=64,
@@ -60,12 +60,12 @@ config = MultituneConfig(
                 logging_steps=10,
 
                 # Checkpointing
-                save_safetensors=True,      # recommended
+                # save_safetensors=True,      # recommended
                 save_strategy="steps",
                 save_steps=500,
 
                 # Packing
-                packing=True,
+                # packing=True,
             ),
         )
     ],

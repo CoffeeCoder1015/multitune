@@ -19,16 +19,17 @@ def TaskDispatcher(report_key:str,model_id:str,lora_config:LoraConfig,task:TaskC
         raise ValueError("TaskDispatcher requires at least one assigned GPU")
     data = task.dataset
     data = data.map(task.data_formatter, remove_columns=data.column_names)
+    device = torch.device(f"cuda:{assigned_gpus[0]}")
 
     tokenizer = AutoTokenizer.from_pretrained(model_id)
     tokenizer.padding_side = "left"
     raw_model = AutoModelForCausalLM.from_pretrained(
         model_id,
         device_map="balanced",
-        max_memory=build_max_memory(assigned_gpus),
+        # max_memory=build_max_memory(assigned_gpus),
         attn_implementation="flash_attention_2",
         dtype=torch.bfloat16,
-    )
+    ).to(device)
     model = get_peft_model(raw_model,lora_config)
     trainer = task.trainer_class(
         model=model,

@@ -2,6 +2,8 @@ import os
 
 import torch
 import multiprocessing as mp
+# Set start method to 'spawn'
+mp.set_start_method('spawn', force=True)
 from .dispatch import TaskDispatcher
 from .trainingConfig import MultituneConfig,TaskConfig
 

@@ -3,3 +3,5 @@
 launch.bat
 __pycache__
 deploy
+*.egg-info
+wandb
