@@ -10,7 +10,7 @@ from .trainingConfig import MultituneConfig,TaskConfig
 class Multitune:
     def __init__(self,config:MultituneConfig):
         self.config = config
-        self.GPU_PER_MODEL = 1
+        self.GPU_PER_MODEL = 2
         self.wandb_api_key = os.environ["WANDB_API_KEY"]
     
     def finetune(self):

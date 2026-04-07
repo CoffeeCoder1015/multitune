@@ -65,7 +65,7 @@ config = MultituneConfig(
                 save_steps=500,
 
                 # Packing
-                # packing=True,
+                packing=True,
             ),
         )
     ],
