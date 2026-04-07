@@ -48,7 +48,7 @@ config = MultituneConfig(
             trainer_config=SFTConfig(
                 # Output and reporting
                 output_dir="output/medical_reasoning",
-                report_to=["output/wandb"],
+                report_to=["wandb"],
 
                 # Optimization
                 per_device_train_batch_size=8,
