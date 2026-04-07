@@ -1,3 +1,4 @@
+from unsloth import FastLanguageModel
 import os
 
 from .trainingConfig import TaskConfig
@@ -5,7 +6,6 @@ from peft import LoraConfig, get_peft_model
 import torch
 import wandb
 
-from unsloth import FastLanguageModel
 from transformers import AutoModelForCausalLM, AutoTokenizer
 
 
