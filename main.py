@@ -4,9 +4,9 @@ from peft import LoraConfig
 from trl import SFTConfig, SFTTrainer
 
 
-# Dataset
+# Datasets
 medical_reasoning = load_dataset("FreedomIntelligence/medical-o1-reasoning-SFT","en", split = "train[:10000]")
-
+chat_to_sql = load_dataset("philschmid/gretel-synthetic-text-to-sql")
 
 # Formatting
 def medical_formatter(example):
@@ -18,6 +18,24 @@ def medical_formatter(example):
                 "content": f"<think>{example['Complex_CoT']}</think>{example['Response']}",
             }
         ],
+    }
+
+def chat_sql_formatter(example):
+    system_message = "You are a text to SQL query translator. Users will ask you questions in English and you will generate a SQL query based on the provided SCHEMA."
+    user_prompt = f"### SCHEMA:\n{example['sql_context']}\n\n### USER QUERY:\n{example['sql_prompt']}"
+    response = f"\n\n### SQL QUERY:\n{example['sql']}"
+
+    prompt = [
+        {"role":"system","content":system_message},
+        {"role":"user","content":user_prompt}
+    ]
+    completion = [
+        { "role":"assistant", "content":response }
+    ]
+
+    return {
+        "prompt": prompt,
+        "completion": completion
     }
 
 
@@ -66,6 +84,39 @@ config = MultituneConfig(
 
                 # Packing
                 packing=True,
+            ),
+        ),
+        TaskConfig(
+            name="chat_to_sql",
+            data_formatter=chat_sql_formatter,
+            dataset=chat_to_sql,
+            trainer_class=SFTTrainer,
+            trainer_config=SFTConfig(
+                # Output and reporting
+                output_dir="output/chat_to_sql",
+                report_to=["wandb"],
+
+                # Precision
+                bf16=True,
+
+                # Optimization
+                per_device_train_batch_size=2,
+                gradient_accumulation_steps=4,
+                learning_rate=2e-5,
+                num_train_epochs=1,
+
+                # Logging
+                logging_steps=10,
+
+                # Checkpointing
+                save_strategy="steps",
+                save_steps=500,
+
+                # Packing
+                packing=True,
+
+                # Seed
+                seed=900913,
             ),
         )
     ],
