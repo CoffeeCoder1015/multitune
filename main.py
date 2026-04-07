@@ -23,7 +23,7 @@ def medical_formatter(example):
 
 # Training configuration
 config = MultituneConfig(
-    model_id="LiquidAI/LFM2.5-1.2B-Base",
+    model_id="Qwen/Qwen3-4B",
     lora_config=LoraConfig(
         lora_alpha=16,                      
         r=64,
