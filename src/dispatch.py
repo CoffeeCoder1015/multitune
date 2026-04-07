@@ -2,7 +2,6 @@ from .trainingConfig import TaskConfig
 from peft import LoraConfig, get_peft_model
 import torch
 import wandb
-import os
 
 from transformers import AutoModelForCausalLM, AutoTokenizer
 
@@ -16,12 +15,9 @@ def build_max_memory(assigned_gpus: list[int], memory_buffer_ratio: float = 0.9)
     return max_memory
 
 def TaskDispatcher(report_key:str,model_id:str,lora_config:LoraConfig,task:TaskConfig,assigned_gpus:list[int]):
+    # TODO: May drop assigned_gpus?
     if not assigned_gpus:
         raise ValueError("TaskDispatcher requires at least one assigned GPU")
-
-    # Assign GPUs
-
-    os.environ["CUDA_VISIBLE_DEVICES"] = ",".join(map(str, assigned_gpus))
 
     data = task.dataset
     data = data.map(task.data_formatter, remove_columns=data.column_names)

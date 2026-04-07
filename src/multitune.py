@@ -22,6 +22,8 @@ class Multitune:
             assigned_gpus = [i*self.GPU_PER_MODEL + j for j in range(self.GPU_PER_MODEL)]
             p = mp.Process(target=TaskDispatcher,args=(self.wandb_api_key,self.config.model_id,self.config.lora_config,task,assigned_gpus))
             processes.append(p)
+            # Assign GPUs
+            os.environ["CUDA_VISIBLE_DEVICES"] = ",".join(map(str, assigned_gpus))
             p.start()
         try:
             for p in processes:
