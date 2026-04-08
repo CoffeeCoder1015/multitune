@@ -58,7 +58,8 @@ def UnslothTaskDispatcher(report_key:str,model_id:str,lora_config:dict,task:Task
     model, tokenizer = FastLanguageModel.from_pretrained(
         model_name= model_id,
         gpu_memory_utilization = 0.9, # Reduce if out of memory
-        fast_inference = True, # Enable vllm fast inference
+        # fast_inference = True, # Enable vllm fast inference
+        device_map="balanced"
     )
     model = FastLanguageModel.get_peft_model(
         model,
