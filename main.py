@@ -41,7 +41,7 @@ def chat_sql_formatter(example):
 
 # Training configuration
 config = MultituneConfig(
-    model_id="unsloth/Qwen3-4B-bnb-4bit",
+    model_id="unsloth/Qwen3-4B",
     lora_config={
         "lora_alpha": 16,
         "r": 64,
@@ -71,9 +71,9 @@ config = MultituneConfig(
                 report_to=["wandb"],
 
                 # Optimization
-                per_device_train_batch_size=8,
+                per_device_train_batch_size=16,
                 gradient_accumulation_steps=4,
-                learning_rate=2e-4,
+                learning_rate=2e-3,
                 num_train_epochs=3,
 
                 # Logging
@@ -88,39 +88,39 @@ config = MultituneConfig(
                 packing=True,
             ),
         ),
-        TaskConfig(
-            name="chat_to_sql",
-            data_formatter=chat_sql_formatter,
-            dataset=chat_to_sql,
-            trainer_class=SFTTrainer,
-            trainer_config=SFTConfig(
-                # Output and reporting
-                output_dir="output/chat_to_sql",
-                report_to=["wandb"],
+        # TaskConfig(
+        #     name="chat_to_sql",
+        #     data_formatter=chat_sql_formatter,
+        #     dataset=chat_to_sql,
+        #     trainer_class=SFTTrainer,
+        #     trainer_config=SFTConfig(
+        #         # Output and reporting
+        #         output_dir="output/chat_to_sql",
+        #         report_to=["wandb"],
 
-                # Precision
-                bf16=True,
+        #         # Precision
+        #         bf16=True,
 
-                # Optimization
-                per_device_train_batch_size=2,
-                gradient_accumulation_steps=4,
-                learning_rate=2e-5,
-                num_train_epochs=1,
+        #         # Optimization
+        #         per_device_train_batch_size=16,
+        #         gradient_accumulation_steps=4,
+        #         learning_rate=2e-5,
+        #         num_train_epochs=1,
 
-                # Logging
-                logging_steps=10,
+        #         # Logging
+        #         logging_steps=10,
 
-                # Checkpointing
-                save_strategy="steps",
-                save_steps=500,
+        #         # Checkpointing
+        #         save_strategy="steps",
+        #         save_steps=500,
 
-                # Packing
-                packing=True,
+        #         # Packing
+        #         packing=True,
 
-                # Seed
-                seed=900913,
-            ),
-        )
+        #         # Seed
+        #         seed=900913,
+        #     ),
+        # )
     ],
 )
 
