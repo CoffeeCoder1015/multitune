@@ -6,7 +6,7 @@ from trl import SFTConfig, SFTTrainer
 
 # Datasets
 medical_reasoning = load_dataset("FreedomIntelligence/medical-o1-reasoning-SFT","en", split = "train[:10000]")
-chat_to_sql = load_dataset("philschmid/gretel-synthetic-text-to-sql")
+chat_to_sql = load_dataset("philschmid/gretel-synthetic-text-to-sql",split="train")
 
 # Formatting
 def medical_formatter(example):
@@ -88,39 +88,39 @@ config = MultituneConfig(
                 packing=True,
             ),
         ),
-        # TaskConfig(
-        #     name="chat_to_sql",
-        #     data_formatter=chat_sql_formatter,
-        #     dataset=chat_to_sql,
-        #     trainer_class=SFTTrainer,
-        #     trainer_config=SFTConfig(
-        #         # Output and reporting
-        #         output_dir="output/chat_to_sql",
-        #         report_to=["wandb"],
+        TaskConfig(
+            name="chat_to_sql",
+            data_formatter=chat_sql_formatter,
+            dataset=chat_to_sql,
+            trainer_class=SFTTrainer,
+            trainer_config=SFTConfig(
+                # Output and reporting
+                output_dir="output/chat_to_sql",
+                report_to=["wandb"],
 
-        #         # Precision
-        #         bf16=True,
+                # Precision
+                bf16=True,
 
-        #         # Optimization
-        #         per_device_train_batch_size=2,
-        #         gradient_accumulation_steps=4,
-        #         learning_rate=2e-5,
-        #         num_train_epochs=1,
+                # Optimization
+                per_device_train_batch_size=2,
+                gradient_accumulation_steps=4,
+                learning_rate=2e-5,
+                num_train_epochs=1,
 
-        #         # Logging
-        #         logging_steps=10,
+                # Logging
+                logging_steps=10,
 
-        #         # Checkpointing
-        #         save_strategy="steps",
-        #         save_steps=500,
+                # Checkpointing
+                save_strategy="steps",
+                save_steps=500,
 
-        #         # Packing
-        #         packing=True,
+                # Packing
+                packing=True,
 
-        #         # Seed
-        #         seed=900913,
-        #     ),
-        # )
+                # Seed
+                seed=900913,
+            ),
+        )
     ],
 )
 
