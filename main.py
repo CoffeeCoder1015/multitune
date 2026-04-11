@@ -1,6 +1,6 @@
-from src import HFMultitune, MultituneConfig, TaskConfig
+from src import LoRAConfigSpec, MultituneConfig, TaskConfig, UnslothLoraOverrides, UnslothMultitune
 from datasets import load_dataset
-from peft import LoraConfig
+from src.trainingConfig import HFLoraOverrides
 from trl import SFTConfig, SFTTrainer
 
 
@@ -32,30 +32,12 @@ def chat_sql_formatter(example):
     # Return a dictionary with the single "text" key
     return {"text": text}
 
-# LoRA configurations
-unsloth_lora_config = {
-    "lora_alpha": 16,
-    "r": 64,
-    "lora_dropout": 0,
-    "bias": "none",
-    "use_gradient_checkpointing": "unsloth",
-    "random_state": 3407,
-    "target_modules": [
-        "q_proj",
-        "k_proj",
-        "v_proj",
-        "o_proj",
-        "gate_proj",
-        "up_proj",
-        "down_proj",
-    ],
-}
-
-hf_lora_config = LoraConfig(
+# LoRA configuration
+lora_config = LoRAConfigSpec(
     lora_alpha=16,
     r=64,
+    lora_dropout=0,
     bias="none",
-    task_type="CAUSAL_LM",
     target_modules=[
         "q_proj",
         "k_proj",
@@ -65,13 +47,16 @@ hf_lora_config = LoraConfig(
         "up_proj",
         "down_proj",
     ],
+    hf_overrides=HFLoraOverrides(
+        task_type="CAUSAL_LM"
+    )
 )
 
 
 # Training configuration
 config = MultituneConfig(
     model_id="unsloth/Qwen3-32B",
-    lora_config=unsloth_lora_config,
+    lora_config=lora_config,
     tasks=[
         TaskConfig(
             name="medical_reasoning",
@@ -86,7 +71,7 @@ config = MultituneConfig(
                 # Optimization
                 per_device_train_batch_size=16,
                 gradient_accumulation_steps=4,
-                learning_rate=2e-3,
+                learning_rate=2e-5,
                 num_train_epochs=3,
 
                 # Logging
@@ -117,7 +102,7 @@ config = MultituneConfig(
                 # Optimization
                 per_device_train_batch_size=16,
                 gradient_accumulation_steps=4,
-                learning_rate=2e-5,
+                learning_rate=2e-4,
                 num_train_epochs=1,
 
                 # Logging
@@ -138,5 +123,5 @@ config = MultituneConfig(
 )
 
 if __name__ == "__main__":
-    multitune = HFMultitune(config)
+    multitune = UnslothMultitune(config)
     multitune.finetune()
