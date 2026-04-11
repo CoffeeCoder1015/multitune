@@ -1,6 +1,14 @@
-from .trainingConfig import MultituneConfig, TaskConfig
+from .trainingConfig import HFLoraOverrides, LoRAConfigSpec, MultituneConfig, TaskConfig, UnslothLoraOverrides
 
-__all__ = ["MultituneConfig","TaskConfig","HFMultitune","UnslothMultitune"]
+__all__ = [
+    "HFLoraOverrides",
+    "LoRAConfigSpec",
+    "MultituneConfig",
+    "TaskConfig",
+    "UnslothLoraOverrides",
+    "HFMultitune",
+    "UnslothMultitune",
+]
 
 def __getattr__(name):
     if name == "UnslothMultitune":
