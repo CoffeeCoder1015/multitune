@@ -35,7 +35,7 @@ def chat_sql_formatter(example):
 
 # Training configuration
 config = MultituneConfig(
-    model_id="unsloth/Qwen3-4B",
+    model_id="Qwen/Qwen3-14B",
     lora_config={
         "lora_alpha": 16,
         "r": 64,
