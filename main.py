@@ -70,7 +70,7 @@ hf_lora_config = LoraConfig(
 
 # Training configuration
 config = MultituneConfig(
-    model_id="Qwen/Qwen3-14B",
+    model_id="unsloth/Qwen3-32B",
     lora_config=unsloth_lora_config,
     tasks=[
         TaskConfig(
