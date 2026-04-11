@@ -1,4 +1,4 @@
-from src import Multitune, MultituneConfig, TaskConfig
+from src import HFMultitune, MultituneConfig, TaskConfig
 from datasets import load_dataset
 from peft import LoraConfig
 from trl import SFTConfig, SFTTrainer
@@ -138,5 +138,5 @@ config = MultituneConfig(
 )
 
 if __name__ == "__main__":
-    multitune = Multitune(config)
+    multitune = HFMultitune(config)
     multitune.finetune()

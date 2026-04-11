@@ -4,17 +4,16 @@ import torch
 import multiprocessing as mp
 # Set start method to 'spawn'
 mp.set_start_method('spawn', force=True)
-from .dispatch import TaskDispatcher, UnslothTaskDispatcher
-from .trainingConfig import MultituneConfig,TaskConfig
+from .trainingConfig import MultituneConfig
 
 class Multitune:
     def __init__(self,config:MultituneConfig):
         self.config = config
         self.GPU_PER_MODEL = 1
         self.wandb_api_key = os.environ["WANDB_API_KEY"]
-        self.dispatched_task = TaskDispatcher
-        if "unsloth" in config.model_id:
-            self.dispatched_task = UnslothTaskDispatcher
+    
+    def get_dispatcher(self):
+        raise NotImplementedError
     
     def finetune(self):
         available_gpus = torch.cuda.device_count()//self.GPU_PER_MODEL
@@ -23,7 +22,7 @@ class Multitune:
         processes = []
         for i,task in enumerate( self.config.tasks ):
             assigned_gpus = [i*self.GPU_PER_MODEL + j for j in range(self.GPU_PER_MODEL)]
-            p = mp.Process(target=self.dispatched_task,args=(self.wandb_api_key,self.config.model_id,self.config.lora_config,task,assigned_gpus))
+            p = mp.Process(target=self.get_dispatcher(),args=(self.wandb_api_key,self.config.model_id,self.config.lora_config,task,assigned_gpus))
             processes.append(p)
             # Assign GPUs
             os.environ["CUDA_VISIBLE_DEVICES"] = ",".join(map(str, assigned_gpus))
