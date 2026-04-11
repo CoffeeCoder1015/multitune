@@ -32,27 +32,46 @@ def chat_sql_formatter(example):
     # Return a dictionary with the single "text" key
     return {"text": text}
 
+# LoRA configurations
+unsloth_lora_config = {
+    "lora_alpha": 16,
+    "r": 64,
+    "lora_dropout": 0,
+    "bias": "none",
+    "use_gradient_checkpointing": "unsloth",
+    "random_state": 3407,
+    "target_modules": [
+        "q_proj",
+        "k_proj",
+        "v_proj",
+        "o_proj",
+        "gate_proj",
+        "up_proj",
+        "down_proj",
+    ],
+}
+
+hf_lora_config = LoraConfig(
+    lora_alpha=16,
+    r=64,
+    bias="none",
+    task_type="CAUSAL_LM",
+    target_modules=[
+        "q_proj",
+        "k_proj",
+        "v_proj",
+        "o_proj",
+        "gate_proj",
+        "up_proj",
+        "down_proj",
+    ],
+)
+
 
 # Training configuration
 config = MultituneConfig(
     model_id="Qwen/Qwen3-14B",
-    lora_config={
-        "lora_alpha": 16,
-        "r": 64,
-        "lora_dropout": 0,
-        "bias": "none",
-        "use_gradient_checkpointing": "unsloth",
-        "random_state": 3407,
-        "target_modules": [
-            "q_proj",
-            "k_proj",
-            "v_proj",
-            "o_proj",
-            "gate_proj",
-            "up_proj",
-            "down_proj",
-        ],
-    },
+    lora_config=unsloth_lora_config,
     tasks=[
         TaskConfig(
             name="medical_reasoning",
