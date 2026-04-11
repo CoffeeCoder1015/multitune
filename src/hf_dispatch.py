@@ -1,15 +1,14 @@
 import os
 
-from .trainingConfig import TaskConfig
+from .trainingConfig import LoRAConfigSpec, TaskConfig
 from peft import LoraConfig, get_peft_model
 import torch
 import wandb
-
 from transformers import AutoModelForCausalLM, AutoTokenizer
 
 from .multitune import Multitune
 
-def TaskDispatcher(report_key:str,model_id:str,lora_config:LoraConfig,task:TaskConfig,assigned_gpus:list[int]):
+def TaskDispatcher(report_key:str,model_id:str,lora_config:LoRAConfigSpec,task:TaskConfig,assigned_gpus:list[int]):
     # TODO: May drop assigned_gpus?
     if not assigned_gpus:
         raise ValueError("TaskDispatcher requires at least one assigned GPU")
@@ -26,7 +25,7 @@ def TaskDispatcher(report_key:str,model_id:str,lora_config:LoraConfig,task:TaskC
         attn_implementation="flash_attention_2",
         dtype=torch.bfloat16,
     )
-    model = get_peft_model(raw_model, lora_config)
+    model = get_peft_model(raw_model, LoraConfig(**lora_config.to_hf_dict()))
     trainer = task.trainer_class(
         model=model,
         args=task.trainer_config,

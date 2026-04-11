@@ -1,11 +1,11 @@
 from unsloth import FastLanguageModel
 import os
-from .trainingConfig import TaskConfig
+from .trainingConfig import LoRAConfigSpec, TaskConfig
 import wandb
 
 from .multitune import Multitune
 
-def UnslothTaskDispatcher(report_key:str,model_id:str,lora_config:dict,task:TaskConfig,assigned_gpus:list[int]):
+def UnslothTaskDispatcher(report_key:str,model_id:str,lora_config:LoRAConfigSpec,task:TaskConfig,assigned_gpus:list[int]):
     # TODO: May drop assigned_gpus?
     if not assigned_gpus:
         raise ValueError("TaskDispatcher requires at least one assigned GPU")
@@ -22,7 +22,7 @@ def UnslothTaskDispatcher(report_key:str,model_id:str,lora_config:dict,task:Task
     )
     model = FastLanguageModel.get_peft_model(
         model,
-        **lora_config
+        **lora_config.to_unsloth_dict()
     )
 
     trainer = task.trainer_class(
