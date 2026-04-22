@@ -1,36 +1,34 @@
 from src import LoRAConfigSpec, MultituneConfig, TaskConfig, UnslothLoraOverrides, UnslothMultitune
 from datasets import load_dataset
 from src.trainingConfig import HFLoraOverrides
+import random
 from trl import SFTConfig, SFTTrainer
 
 
 # Datasets
-medical_reasoning = load_dataset("FreedomIntelligence/medical-o1-reasoning-SFT","en", split = "train[:10000]")
-chat_to_sql = load_dataset("philschmid/gretel-synthetic-text-to-sql",split="train")
+snli = load_dataset("snli", split="train")
 
-# Formatting
-def medical_formatter(example):
-    # Define the system and instruction texts
-    system_prompt = "Below is an instruction that describes a task, paired with an input that provides further context. Write a response that appropriately completes the request. Before answering, think carefully about the question and create a step-by-step chain of thoughts to ensure a logical and accurate response."
-    
-    instruction = "You are a medical expert with advanced knowledge in clinical reasoning, diagnostics, and treatment planning. Please answer the following medical question."
-    
-    # Merge everything into a single formatted string using the tutorial's structure
-    text = f"### System:\n{system_prompt}\n\n### Instruction:\n{instruction}\n\n### Question:\n{example['Question']}\n\n### Chain of Thought:\n{example['Complex_CoT']}\n\n### Response:\n{example['Response']}"
-    
-    # Return a dictionary with the single "text" key
-    return {"text": text}
+NLI_PROMPT_VARIATIONS = [
+    lambda p, h: f"Is the hypothesis entailed, neutral, or contradictory to the premise? Premise: {p} Hypothesis: {h}",
+    lambda p, h: f"What is the relationship between premise and hypothesis? Premise: {p} Hypothesis: {h}",
+    lambda p, h: f"Inference the relationship between the Premise: {p} and Hypothesis: {h}",
+    lambda p, h: f"Classify as entailment, neutral, or contradiction.\nPremise: {p}\nHypothesis: {h}",
+    lambda p, h: f"Premise: {p}\nHypothesis: {h}\nRelationship:",
+]
 
+CLASSIFICATION_MAP = ["entailment", "neutral", "contradiction"]
 
-def chat_sql_formatter(example):
-    # Define the system message
-    system_message = "You are a text to SQL query translator. Users will ask you questions in English and you will generate a SQL query based on the provided SCHEMA."
+def snli_formatter(example):
+    prompt_fn = random.choice(NLI_PROMPT_VARIATIONS)
+    prompt = [ {"role":"user","content":prompt_fn(example["premise"], example["hypothesis"])} ]
 
-    # Merge everything into a single formatted string using the tutorial's structure
-    text = f"### System:\n{system_message}\n\n### Schema:\n{example['sql_context']}\n\n### User Query:\n{example['sql_prompt']}\n\n### SQL Query:\n{example['sql']}"
+    label = CLASSIFICATION_MAP[example["label"]]
+    completion = [ {"role":"assistant", "content":label}]
 
-    # Return a dictionary with the single "text" key
-    return {"text": text}
+    example["prompt"] = prompt
+    example["completion"] = completion
+    return example
+
 
 # LoRA configuration
 lora_config = LoRAConfigSpec(
@@ -55,70 +53,9 @@ lora_config = LoRAConfigSpec(
 
 # Training configuration
 config = MultituneConfig(
-    model_id="unsloth/Qwen3-32B",
+    model_id="/LiquidAI/LFM2.5-1.2B-Thinking",
     lora_config=lora_config,
     tasks=[
-        TaskConfig(
-            name="medical_reasoning",
-            data_formatter=medical_formatter,
-            dataset=medical_reasoning,
-            trainer_class=SFTTrainer,
-            trainer_config=SFTConfig(
-                # Output and reporting
-                output_dir="output/medical_reasoning",
-                report_to=["wandb"],
-
-                # Optimization
-                per_device_train_batch_size=16,
-                gradient_accumulation_steps=4,
-                learning_rate=2e-5,
-                num_train_epochs=3,
-
-                # Logging
-                logging_steps=10,
-
-                # Checkpointing
-                # save_safetensors=True,      # recommended
-                save_strategy="steps",
-                save_steps=500,
-
-                # Packing
-                packing=True,
-            ),
-        ),
-        TaskConfig(
-            name="chat_to_sql",
-            data_formatter=chat_sql_formatter,
-            dataset=chat_to_sql,
-            trainer_class=SFTTrainer,
-            trainer_config=SFTConfig(
-                # Output and reporting
-                output_dir="output/chat_to_sql",
-                report_to=["wandb"],
-
-                # Precision
-                bf16=True,
-
-                # Optimization
-                per_device_train_batch_size=16,
-                gradient_accumulation_steps=4,
-                learning_rate=2e-4,
-                num_train_epochs=1,
-
-                # Logging
-                logging_steps=10,
-
-                # Checkpointing
-                save_strategy="steps",
-                save_steps=500,
-
-                # Packing
-                packing=True,
-
-                # Seed
-                seed=900913,
-            ),
-        )
     ],
 )
 
