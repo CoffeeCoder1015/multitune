@@ -7,6 +7,27 @@ from trl import SFTConfig, SFTTrainer
 
 # Datasets
 snli = load_dataset("snli", split="train")
+logic_fallacy = load_dataset("tasksource/logical-fallacy",split="train")
+
+FALLACY_PROMPT_VARIATIONS = [
+    lambda p : f"What logical fallacy is: {p}",
+    lambda p : f"Examine \"{p}\" and identify what logical fallacy is it. ",
+    lambda p : f"{p}, the logical fallacy is:",
+    lambda p : f"Analyze the following statement for logical inconsistencies: \"{p}\". Provide the name of the fallacy and a brief justification.",
+    lambda p : f"Instruction: Categorize the logical error in the text below.\nText: {p}\nFallacy Category:"
+]
+
+def fallacy_formatter(example):
+    prompt_fn = random.choice(FALLACY_PROMPT_VARIATIONS)
+    base_prompt = example["source_article"]
+    answer = example["logical_fallacies"]
+
+    prompt = [ {"role":"user","content":prompt_fn(base_prompt)} ]
+    completion = [ {"role":"assistant","content":example["logical_fallacies"]} ]
+    return {
+        "prompt":prompt,
+        "completion":completion
+    }
 
 NLI_PROMPT_VARIATIONS = [
     lambda p, h: f"Is the hypothesis entailed, neutral, or contradictory to the premise? Premise: {p} Hypothesis: {h}",
