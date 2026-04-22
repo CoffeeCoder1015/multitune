@@ -6,7 +6,7 @@ from trl import SFTConfig, SFTTrainer
 
 
 # Datasets
-snli = load_dataset("snli", split="train")
+snli = load_dataset("snli", split="train[:50_000]")
 snli_val = load_dataset("snli", split="validation")
 logic_fallacy = load_dataset("tasksource/logical-fallacy",split="train")
 logic_fallacy_val = load_dataset("tasksource/logical-fallacy",split="dev")
@@ -76,7 +76,7 @@ lora_config = LoRAConfigSpec(
 
 # Training configuration
 config = MultituneConfig(
-    model_id="/LiquidAI/LFM2.5-1.2B-Thinking",
+    model_id="LiquidAI/LFM2.5-1.2B-Thinking",
     lora_config=lora_config,
     tasks=[
         TaskConfig(
