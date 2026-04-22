@@ -53,7 +53,7 @@ def snli_formatter(example):
 
 # LoRA configuration
 lora_config = LoRAConfigSpec(
-    lora_alpha=16,
+    lora_alpha=128,
     r=64,
     lora_dropout=0,
     bias="none",
