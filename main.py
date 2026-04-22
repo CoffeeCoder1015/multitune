@@ -7,7 +7,9 @@ from trl import SFTConfig, SFTTrainer
 
 # Datasets
 snli = load_dataset("snli", split="train")
+snli_val = load_dataset("snli", split="validation")
 logic_fallacy = load_dataset("tasksource/logical-fallacy",split="train")
+logic_fallacy_val = load_dataset("tasksource/logical-fallacy",split="dev")
 
 FALLACY_PROMPT_VARIATIONS = [
     lambda p : f"What logical fallacy is: {p}",
@@ -77,6 +79,76 @@ config = MultituneConfig(
     model_id="/LiquidAI/LFM2.5-1.2B-Thinking",
     lora_config=lora_config,
     tasks=[
+        TaskConfig(
+            name="snli",
+            dataset=snli,
+            data_formatter=snli_formatter,
+            trainer_class=SFTTrainer,
+            trainer_config=SFTConfig(
+                # Output and reporting
+                output_dir="output/snli",
+                report_to=["wandb"],
+
+                # Optimization
+                per_device_train_batch_size=8,
+                gradient_accumulation_steps=2,
+                learning_rate=2e-4,
+                num_train_epochs=5,
+
+                # Logging
+                logging_steps=10,
+
+                # Checkpointing
+                save_strategy="steps",
+                save_steps=250,
+                save_total_limit=5,
+
+                # Packing
+                packing=True,
+                
+                # Eval
+                eval_strategy="steps",
+                eval_steps=50,
+            ),
+            trainer_kwargs={
+                "eval_dataset":snli_val.map(snli_formatter)
+            }
+        ),
+        TaskConfig(
+            name="fallacy",
+            dataset=logic_fallacy,
+            data_formatter=fallacy_formatter,
+            trainer_class=SFTTrainer,
+            trainer_config=SFTConfig(
+                # Output and reporting
+                output_dir="output/fallacy",
+                report_to=["wandb"],
+
+                # Optimization
+                per_device_train_batch_size=8,
+                gradient_accumulation_steps=2,
+                learning_rate=2e-4,
+                num_train_epochs=5,
+
+                # Logging
+                logging_steps=10,
+
+                # Checkpointing
+                save_strategy="steps",
+                save_steps=250,
+                save_total_limit=5,
+
+                # Packing
+                packing=True,
+                
+                # Eval
+                eval_strategy="steps",
+                eval_steps=50,
+            ),
+            trainer_kwargs={
+                "eval_dataset":logic_fallacy_val.map(fallacy_formatter)
+            }
+        )
     ],
 )
 
