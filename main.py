@@ -25,7 +25,7 @@ def fallacy_formatter(example):
     answer = example["logical_fallacies"]
 
     prompt = [ {"role":"user","content":prompt_fn(base_prompt)} ]
-    completion = [ {"role":"assistant","content":example["logical_fallacies"]} ]
+    completion = [ {"role":"assistant","content":answer} ]
     return {
         "prompt":prompt,
         "completion":completion
