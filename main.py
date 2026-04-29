@@ -6,10 +6,13 @@ from trl import SFTConfig, SFTTrainer
 
 
 # Datasets
-snli = load_dataset("snli", split="train[:50_000]")
+snli = load_dataset("snli", split="train[:100_000]")
 snli_val = load_dataset("snli", split="validation")
 logic_fallacy = load_dataset("tasksource/logical-fallacy",split="train")
 logic_fallacy_val = load_dataset("tasksource/logical-fallacy",split="dev")
+vitaminc = load_dataset("tals/vitaminc",split="train[:100_000]")
+vitaminc_val = load_dataset("tals/vitaminc",split="validation")
+
 
 FALLACY_PROMPT_VARIATIONS = [
     lambda p : f"What logical fallacy is: {p}",
@@ -52,6 +55,27 @@ def snli_formatter(example):
     example["completion"] = completion
     return example
 
+
+CLAIM_SUPPORT_VARIATIONS = [
+    lambda e,c: f"Evidence: {e}\nClaim: {c}\nEvaluate the relationship between the evidence and the claim.",
+    lambda e,c: f"Evidence:{e}\nClaim:{c}\nEvaluate:",
+    lambda e,c: f"Read the evidence below and determine whether it establishes the claim.\nEvidence: {e}\nClaim: {c}\nAssessment:",
+    lambda e,c: f"Determine if the claim is supported by the evidence.\nClaim:{c}\nEvidence:{e}",
+    lambda e,c: f"{e}\nFrom information provided above, determine if \"{c}\" is a claim that is supported, not supported or is there not enough info."
+]
+
+def vitaminc_formatter(example):
+    evidence = example["evidence"]
+    claim = example["claim"]
+    label = str( example["label"] ).lower()
+    prompt_fn = random.choice(CLAIM_SUPPORT_VARIATIONS)
+    
+    prompt = [{"role":"user","content":prompt_fn(evidence,claim)}]
+    completion = [{"role":"assistant","content":label}]
+
+    example["prompt"] = prompt
+    example["completion"] = completion
+    return example
 
 # LoRA configuration
 lora_config = LoRAConfigSpec(
@@ -147,6 +171,41 @@ config = MultituneConfig(
             ),
             trainer_kwargs={
                 "eval_dataset":logic_fallacy_val.map(fallacy_formatter)
+            }
+        ),
+        TaskConfig(
+            name="claim",
+            dataset=vitaminc,
+            data_formatter=vitaminc_formatter,
+            trainer_class=SFTTrainer,
+            trainer_config=SFTConfig(
+                # Output and reporting
+                output_dir="output/claim",
+                report_to=["wandb"],
+
+                # Optimization
+                per_device_train_batch_size=8,
+                gradient_accumulation_steps=2,
+                learning_rate=2e-4,
+                num_train_epochs=5,
+
+                # Logging
+                logging_steps=10,
+
+                # Checkpointing
+                save_strategy="steps",
+                save_steps=250,
+                save_total_limit=5,
+
+                # Packing
+                packing=True,
+                
+                # Eval
+                eval_strategy="steps",
+                eval_steps=50,
+            ),
+            trainer_kwargs={
+                "eval_dataset":vitaminc_val.map(vitaminc_formatter)
             }
         )
     ],
