@@ -116,8 +116,8 @@ config = MultituneConfig(
                 # Optimization
                 per_device_train_batch_size=8,
                 gradient_accumulation_steps=2,
-                learning_rate=2.5e-4,
-                num_train_epochs=5,
+                learning_rate=1.2e-4,
+                num_train_epochs=3,
 
                 # Logging
                 logging_steps=10,
@@ -151,8 +151,8 @@ config = MultituneConfig(
                 # Optimization
                 per_device_train_batch_size=8,
                 gradient_accumulation_steps=2,
-                learning_rate=2e-5,
-                num_train_epochs=90,
+                learning_rate=2e-4,
+                num_train_epochs=60,
 
                 # Logging
                 logging_steps=10,
@@ -186,8 +186,8 @@ config = MultituneConfig(
                 # Optimization
                 per_device_train_batch_size=8,
                 gradient_accumulation_steps=2,
-                learning_rate=2.5e-4,
-                num_train_epochs=5,
+                learning_rate=1.2e-4,
+                num_train_epochs=3,
 
                 # Logging
                 logging_steps=10,
